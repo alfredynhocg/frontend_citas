@@ -45,6 +45,18 @@ export async function testConnection() {
       INDEX idx_created (created_at)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
   `);
+  await conn.query(`
+    CREATE TABLE IF NOT EXISTS whatsapp_ia_logs (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      phone VARCHAR(50) NOT NULL,
+      user_input TEXT NULL,
+      respuesta TEXT NULL,
+      modelo VARCHAR(100) NULL,
+      created_at DATETIME NOT NULL DEFAULT NOW(),
+      INDEX idx_phone (phone),
+      INDEX idx_created (created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+  `);
   conn.release();
   console.log('[DB] Conexión a MySQL exitosa —', process.env.DB_DATABASE);
 }

@@ -3,6 +3,7 @@ import QRCode from 'qrcode';
 import multer from 'multer';
 import { getStatus, getQr, sendMessage, sendMediaMessage, disconnect } from '../bot.js';
 import { listConversaciones, getMensajes, getAllPhones, marcarAtendido, getConversacion, logMensaje } from '../store.js';
+import { setConfig, getConfig } from '../agent.js';
 
 const upload = multer({ storage: multer.memoryStorage() });
 const router = Router();
@@ -90,6 +91,15 @@ router.post('/enviar-media', upload.single('archivo'), async (req, res) => {
 router.get('/phones', async (_req, res) => {
   try { res.json({ phones: await getAllPhones() }); }
   catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+router.get('/ia/config', (_req, res) => res.json(getConfig()));
+
+router.post('/ia/config', (req, res) => {
+  try {
+    setConfig(req.body);
+    res.json({ message: 'Configuración actualizada' });
+  } catch (err) { res.status(400).json({ message: err.message }); }
 });
 
 export default router;

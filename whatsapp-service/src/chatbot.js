@@ -3,6 +3,7 @@ import { extractText, phone, sendText } from './utils/wa.js';
 import { sendMenu, handleNumericInput } from './handlers/menu.js';
 import { showCategorias } from './handlers/citas.js';
 import { handleSoporte } from './handlers/misc.js';
+import { responder as agentResponder } from './agent.js';
 
 const MENU_TRIGGERS = ['0', 'menu', 'menú', 'inicio', 'volver', 'start', 'hola', 'hi', 'buenas'];
 
@@ -103,6 +104,18 @@ async function _dispatch(sock, jid, from, text, nombre, estado, contexto) {
         return;
       }
     }
+  }
+
+  let respuesta;
+  try {
+    respuesta = await agentResponder(from, text);
+  } catch {
+    respuesta = null;
+  }
+
+  if (respuesta) {
+    await sendText(sock, jid, respuesta);
+    return;
   }
 
   await sendText(sock, jid,

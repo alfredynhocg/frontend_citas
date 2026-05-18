@@ -394,6 +394,12 @@ const router = createRouter({
       component: () => import('@/views/whatsapp/mensajes/index.vue'),
     },
     {
+      path: '/whatsapp/configuracion',
+      name: 'WhatsappConfiguracion',
+      meta: { title: 'Configuración IA Bot' },
+      component: () => import('@/views/whatsapp/configuracion/index.vue'),
+    },
+    {
       path: '/users/:id',
       name: 'UserDetail',
       meta: { title: 'Editar Usuario', requiresAdmin: true },

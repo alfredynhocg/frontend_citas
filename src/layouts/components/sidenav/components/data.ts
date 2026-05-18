@@ -90,4 +90,10 @@ export const menuItems: MenuItemType[] = [
     icon: 'lucide:message-circle',
     url: '/whatsapp/conversaciones',
   },
+  {
+    key: 'whatsapp-configuracion',
+    label: 'Configuración IA',
+    icon: 'lucide:settings-2',
+    url: '/whatsapp/configuracion',
+  },
 ]
