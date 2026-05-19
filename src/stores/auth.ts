@@ -21,7 +21,10 @@ export const useAuthStore = defineStore(
     const sessionExpired = ref(false)
 
     const isAuthenticated = computed(() => !!accessToken.value)
-    const isAdmin = computed(() => user.value?.role === 'admin')
+    // Acepta tanto el campo nuevo (role) como el viejo (rol_id) por compatibilidad con sesiones persistidas
+    const isAdmin = computed(() =>
+      user.value?.role === 'admin' || (user.value as any)?.rol_id === 1
+    )
 
     async function login(email: string, password: string) {
       const res = await fetch(`${API}/auth/login`, {

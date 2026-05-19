@@ -1,165 +1,204 @@
 <template>
-  <div>
-    <PageTitle title="Usuarios" :breadcrumb="[{ label: 'Admin' }, { label: 'Usuarios' }]" />
+  <Vertical>
+    <div class="p-4 sm:p-6 space-y-6">
 
-    <!-- Toolbar -->
-    <div class="card mb-4">
-      <div class="card-body flex flex-wrap gap-3 items-center justify-between">
-        <div class="flex gap-3 flex-wrap">
-          <!-- Buscador -->
-          <div class="relative">
-            <Icon icon="lucide:search" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 size-4" />
-            <input
-              v-model="search"
-              type="text"
-              placeholder="Buscar nombre o email…"
-              class="form-input pl-9 w-56"
-            />
-          </div>
-          <!-- Filtro rol -->
-          <select v-model="roleFilter" class="form-select w-40">
-            <option value="">Todos los roles</option>
-            <option value="admin">Admin</option>
-            <option value="couple">Pareja</option>
-            <option value="guest">Invitado</option>
-          </select>
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <h1 class="text-2xl font-bold text-default-900">Usuarios</h1>
+          <p class="text-sm text-default-500 mt-0.5">Gestión de cuentas registradas.</p>
         </div>
-        <span class="text-sm text-gray-500">{{ total }} usuario(s)</span>
+        <span class="text-sm text-default-400 pt-1.5">{{ total }} usuario(s)</span>
       </div>
-    </div>
 
-    <!-- Tabla -->
-    <div class="card">
-      <div class="card-body p-0">
-        <div v-if="loading" class="flex justify-center py-12">
-          <Icon icon="lucide:loader-circle" class="size-8 animate-spin text-primary" />
+      <div class="card p-4 flex flex-wrap gap-3 items-center">
+        <div class="relative flex-1 min-w-44">
+          <Icon icon="lucide:search" class="absolute left-3 top-1/2 -translate-y-1/2 text-default-400 size-4" />
+          <input v-model="search" type="text" placeholder="Buscar nombre o email…"
+            class="w-full border border-default-200 rounded-xl pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300" />
+        </div>
+        <select v-model="roleFilter"
+          class="border border-default-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
+          <option value="">Todos los roles</option>
+          <option value="admin">Admin</option>
+          <option value="couple">Pareja</option>
+          <option value="guest">Invitado</option>
+        </select>
+      </div>
+
+      <div class="card overflow-hidden">
+        <div v-if="loading" class="flex justify-center py-16">
+          <Icon icon="lucide:loader-circle" class="size-8 animate-spin text-rose-400" />
         </div>
 
-        <div v-else-if="error" class="p-6 text-red-500 flex gap-2 items-center">
-          <Icon icon="lucide:alert-circle" class="size-5" />
+        <div v-else-if="error" class="p-6 flex items-center gap-2 text-red-500 text-sm">
+          <Icon icon="lucide:alert-circle" class="size-5 flex-shrink-0" />
           {{ error }}
         </div>
 
-        <table v-else class="table w-full">
-          <thead>
-            <tr>
-              <th class="w-10">#</th>
-              <th>Usuario</th>
-              <th>Email</th>
-              <th>Rol</th>
-              <th>Estado</th>
-              <th>Registrado</th>
-              <th class="text-right">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="filtered.length === 0">
-              <td colspan="7" class="text-center py-8 text-gray-400">No se encontraron usuarios</td>
-            </tr>
-            <tr v-for="u in filtered" :key="u.id" class="hover:bg-gray-50 dark:hover:bg-gray-800">
-              <td class="text-gray-400 text-sm">{{ u.id }}</td>
-              <td>
-                <div class="flex items-center gap-3">
-                  <div class="avatar avatar-sm avatar-soft-primary rounded-full flex items-center justify-center font-semibold text-sm size-9">
-                    {{ initials(u.name) }}
-                  </div>
-                  <span class="font-medium">{{ u.name }}</span>
+        <template v-else>
+          <div class="sm:hidden divide-y divide-default-100">
+            <div v-if="!filtered.length" class="py-12 text-center text-default-400 text-sm">
+              No se encontraron usuarios
+            </div>
+            <div v-for="u in filtered" :key="u.id" class="p-4 flex items-center gap-3">
+              <div class="size-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
+                :class="avatarColor(u.role)">
+                {{ initials(u.name) }}
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold text-default-900 text-sm truncate">{{ u.name }}</p>
+                <p class="text-xs text-default-400 truncate">{{ u.email }}</p>
+                <div class="flex gap-1.5 mt-1">
+                  <span :class="roleBadgeClass(u.role)"
+                    class="text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                    {{ roleLabel(u.role) }}
+                  </span>
+                  <span :class="u.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'"
+                    class="text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                    {{ u.is_active ? 'Activo' : 'Inactivo' }}
+                  </span>
                 </div>
-              </td>
-              <td class="text-sm">{{ u.email }}</td>
-              <td>
-                <span :class="roleBadge(u.role)" class="badge text-xs font-medium px-2 py-0.5 rounded-full">
-                  {{ roleLabel(u.role) }}
-                </span>
-              </td>
-              <td>
-                <span
-                  :class="u.is_active
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-red-100 text-red-600'"
-                  class="badge text-xs px-2 py-0.5 rounded-full"
-                >
-                  {{ u.is_active ? 'Activo' : 'Inactivo' }}
-                </span>
-              </td>
-              <td class="text-sm text-gray-500">{{ formatDate(u.created_at) }}</td>
-              <td class="text-right">
-                <div class="flex gap-2 justify-end">
-                  <router-link
-                    :to="{ name: 'UserDetail', params: { id: u.id } }"
-                    class="btn btn-sm btn-outline-primary"
-                    title="Editar"
-                  >
-                    <Icon icon="lucide:pencil" class="size-4" />
-                  </router-link>
-                  <button
-                    class="btn btn-sm btn-outline-danger"
-                    title="Eliminar"
-                    :disabled="u.id === authStore.user?.id"
-                    @click="confirmDelete(u)"
-                  >
-                    <Icon icon="lucide:trash-2" class="size-4" />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              </div>
+              <div class="flex gap-2 flex-shrink-0">
+                <router-link :to="{ name: 'UserDetail', params: { id: u.id } }"
+                  class="size-8 rounded-lg border border-default-200 flex items-center justify-center hover:bg-default-50 transition-colors">
+                  <Icon icon="lucide:pencil" class="size-3.5 text-default-500" />
+                </router-link>
+                <button @click="confirmDelete(u)" :disabled="u.id === authStore.user?.id"
+                  class="size-8 rounded-lg border border-red-100 flex items-center justify-center hover:bg-red-50 transition-colors disabled:opacity-30">
+                  <Icon icon="lucide:trash-2" class="size-3.5 text-red-400" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="hidden sm:block overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-default-50 border-b border-default-100">
+                <tr>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wide w-10">#</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wide">Usuario</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wide">Email</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wide">Rol</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wide">Estado</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-default-500 uppercase tracking-wide">Registrado</th>
+                  <th class="px-4 py-3 text-right text-xs font-semibold text-default-500 uppercase tracking-wide">Acciones</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-default-100">
+                <tr v-if="!filtered.length">
+                  <td colspan="7" class="text-center py-12 text-default-400">No se encontraron usuarios</td>
+                </tr>
+                <tr v-for="u in filtered" :key="u.id" class="hover:bg-default-50 transition-colors">
+                  <td class="px-4 py-3 text-default-400">{{ u.id }}</td>
+                  <td class="px-4 py-3">
+                    <div class="flex items-center gap-3">
+                      <div class="size-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
+                        :class="avatarColor(u.role)">
+                        {{ initials(u.name) }}
+                      </div>
+                      <span class="font-medium text-default-900">{{ u.name }}</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3 text-default-500">{{ u.email }}</td>
+                  <td class="px-4 py-3">
+                    <span :class="roleBadgeClass(u.role)"
+                      class="text-xs font-semibold px-2.5 py-1 rounded-full">
+                      {{ roleLabel(u.role) }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span :class="u.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'"
+                      class="text-xs font-semibold px-2.5 py-1 rounded-full">
+                      {{ u.is_active ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 text-default-400 text-xs">{{ formatDate(u.created_at) }}</td>
+                  <td class="px-4 py-3">
+                    <div class="flex gap-2 justify-end">
+                      <router-link :to="{ name: 'UserDetail', params: { id: u.id } }"
+                        class="inline-flex items-center gap-1.5 text-xs font-medium border border-default-200 px-3 py-1.5 rounded-lg hover:bg-default-50 transition-colors text-default-600">
+                        <Icon icon="lucide:pencil" class="size-3.5" />
+                        Editar
+                      </router-link>
+                      <button @click="confirmDelete(u)" :disabled="u.id === authStore.user?.id"
+                        class="inline-flex items-center gap-1.5 text-xs font-medium border border-red-100 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors text-red-500 disabled:opacity-30">
+                        <Icon icon="lucide:trash-2" class="size-3.5" />
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div v-if="pages > 1" class="flex items-center justify-between px-4 py-3 border-t border-default-100">
+            <span class="text-xs text-default-400">Página {{ page }} de {{ pages }}</span>
+            <div class="flex gap-2">
+              <button :disabled="page <= 1" @click="page--"
+                class="size-8 rounded-lg border border-default-200 flex items-center justify-center hover:bg-default-50 disabled:opacity-30 transition-colors">
+                <Icon icon="lucide:chevron-left" class="size-4 text-default-500" />
+              </button>
+              <button :disabled="page >= pages" @click="page++"
+                class="size-8 rounded-lg border border-default-200 flex items-center justify-center hover:bg-default-50 disabled:opacity-30 transition-colors">
+                <Icon icon="lucide:chevron-right" class="size-4 text-default-500" />
+              </button>
+            </div>
+          </div>
+        </template>
       </div>
 
-      <!-- Paginación -->
-      <div v-if="pages > 1" class="card-footer flex items-center justify-between">
-        <span class="text-sm text-gray-500">Página {{ page }} de {{ pages }}</span>
-        <div class="flex gap-2">
-          <button class="btn btn-sm btn-outline-secondary" :disabled="page <= 1" @click="page--">
-            <Icon icon="lucide:chevron-left" class="size-4" />
-          </button>
-          <button class="btn btn-sm btn-outline-secondary" :disabled="page >= pages" @click="page++">
-            <Icon icon="lucide:chevron-right" class="size-4" />
-          </button>
-        </div>
-      </div>
     </div>
 
-    <!-- Modal confirm delete -->
-    <div v-if="toDelete" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div class="card w-full max-w-sm shadow-xl">
-        <div class="card-body text-center space-y-4">
-          <Icon icon="lucide:alert-triangle" class="size-12 text-red-500 mx-auto" />
-          <p class="font-semibold text-lg">¿Eliminar usuario?</p>
-          <p class="text-sm text-gray-500">
-            Se eliminará a <strong>{{ toDelete.name }}</strong> de forma permanente.
-          </p>
-          <div class="flex gap-3 justify-center">
-            <button class="btn btn-outline-secondary" @click="toDelete = null">Cancelar</button>
-            <button class="btn btn-danger" :disabled="loading" @click="doDelete">
-              <Icon v-if="loading" icon="lucide:loader-circle" class="size-4 animate-spin mr-1" />
+    <Teleport to="body">
+      <div v-if="toDelete" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+        @click.self="toDelete = null">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center space-y-4">
+          <div class="size-14 rounded-full bg-red-100 flex items-center justify-center mx-auto">
+            <Icon icon="lucide:trash-2" class="size-7 text-red-500" />
+          </div>
+          <div>
+            <p class="font-bold text-default-900 text-lg">¿Eliminar usuario?</p>
+            <p class="text-sm text-default-500 mt-1">
+              Se eliminará a <strong>{{ toDelete.name }}</strong> de forma permanente.
+            </p>
+          </div>
+          <div class="flex gap-3">
+            <button @click="toDelete = null"
+              class="flex-1 py-2.5 border border-default-200 rounded-xl text-sm text-default-600 hover:bg-default-50 transition-colors">
+              Cancelar
+            </button>
+            <button @click="doDelete" :disabled="loading"
+              class="flex-1 py-2.5 bg-red-500 text-white text-sm font-semibold rounded-xl hover:bg-red-600 disabled:opacity-50 transition-colors flex items-center justify-center gap-2">
+              <Icon v-if="loading" icon="lucide:loader-circle" class="size-4 animate-spin" />
               Eliminar
             </button>
           </div>
         </div>
       </div>
-    </div>
-  </div>
+    </Teleport>
+
+  </Vertical>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
-import PageTitle from '@/components/PageTitle.vue'
+import Vertical from '@/layouts/vertical.vue'
 import { useUsers, type UserItem } from '@/composables/useUsers'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
 const { loading, error, fetchUsers, deleteUser } = useUsers()
 
-const search = ref('')
+const search     = ref('')
 const roleFilter = ref('')
-const page = ref(1)
-const pages = ref(1)
-const total = ref(0)
-const items = ref<UserItem[]>([])
-const toDelete = ref<UserItem | null>(null)
+const page       = ref(1)
+const pages      = ref(1)
+const total      = ref(0)
+const items      = ref<UserItem[]>([])
+const toDelete   = ref<UserItem | null>(null)
 
 const filtered = computed(() => {
   const q = search.value.toLowerCase()
@@ -171,31 +210,40 @@ const filtered = computed(() => {
 
 async function load() {
   const data = await fetchUsers({ page: page.value, per_page: 20, role: roleFilter.value || undefined })
-  items.value = data.items
-  total.value = data.total
-  pages.value = data.pages
+  items.value  = data.items
+  total.value  = data.total
+  pages.value  = data.pages
 }
 
 watch([page, roleFilter], load)
 onMounted(load)
 
 function initials(name: string) {
-  return name.split(' ').slice(0, 2).map((w) => w[0]).join('').toUpperCase()
+  return (name ?? '?').split(' ').slice(0, 2).map((w) => w[0] ?? '').join('').toUpperCase()
 }
 
 function roleLabel(role: string) {
   return { admin: 'Admin', couple: 'Pareja', guest: 'Invitado' }[role] ?? role
 }
 
-function roleBadge(role: string) {
-  return {
+function roleBadgeClass(role: string) {
+  return ({
     admin:  'bg-purple-100 text-purple-700',
     couple: 'bg-pink-100 text-pink-700',
-    guest:  'bg-gray-100 text-gray-600',
-  }[role] ?? 'bg-gray-100 text-gray-600'
+    guest:  'bg-default-100 text-default-600',
+  } as Record<string, string>)[role] ?? 'bg-default-100 text-default-600'
+}
+
+function avatarColor(role: string) {
+  return ({
+    admin:  'bg-purple-100 text-purple-700',
+    couple: 'bg-rose-100 text-rose-600',
+    guest:  'bg-default-100 text-default-500',
+  } as Record<string, string>)[role] ?? 'bg-default-100 text-default-500'
 }
 
 function formatDate(iso: string) {
+  if (!iso) return '—'
   return new Date(iso).toLocaleDateString('es-BO', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 

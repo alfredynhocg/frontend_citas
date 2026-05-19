@@ -28,6 +28,24 @@ const router = createRouter({
       component: () => import('@/views/citas/parejas/index.vue'),
     },
     {
+      path: '/grupos',
+      name: 'Grupos',
+      meta: { title: 'Mis Grupos' },
+      component: () => import('@/views/citas/grupos/index.vue'),
+    },
+    {
+      path: '/mensajes',
+      name: 'Mensajes',
+      meta: { title: 'Mensajes' },
+      component: () => import('@/views/citas/mensajes/index.vue'),
+    },
+    {
+      path: '/suscripciones',
+      name: 'Suscripciones',
+      meta: { title: 'Suscripciones' },
+      component: () => import('@/views/citas/suscripciones/index.vue'),
+    },
+    {
       path: '/recuerdos',
       name: 'Recuerdos',
       meta: { title: 'Recuerdos' },
@@ -38,6 +56,12 @@ const router = createRouter({
       name: 'Perfil',
       meta: { title: 'Mi Perfil' },
       component: () => import('@/views/citas/perfil/index.vue'),
+    },
+    {
+      path: '/admin/pagos',
+      name: 'AdminPagos',
+      meta: { title: 'Gestión de Pagos', requiresAdmin: true },
+      component: () => import('@/views/admin/pagos/index.vue'),
     },
     {
       path: '/dashboard/ecommerce',
@@ -356,6 +380,12 @@ const router = createRouter({
       name: 'UserList',
       meta: { title: 'Usuarios', requiresAdmin: true },
       component: () => import('@/views/users/list/index.vue')
+    },
+    {
+      path: '/admin/roles',
+      name: 'AdminRoles',
+      meta: { title: 'Roles', requiresAdmin: true },
+      component: () => import('@/views/admin/roles/index.vue'),
     },
     {
       path: '/admin/categorias',

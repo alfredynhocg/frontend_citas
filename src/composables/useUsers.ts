@@ -24,6 +24,7 @@ export interface UpdateUserPayload {
   name?: string
   email?: string
   role?: string
+  rol_id?: number
   is_active?: boolean
   password?: string
 }

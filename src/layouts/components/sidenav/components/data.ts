@@ -31,6 +31,24 @@ export const menuItems: MenuItemType[] = [
     url: '/parejas',
   },
   {
+    key: 'grupos',
+    label: 'Grupos',
+    icon: 'lucide:users',
+    url: '/grupos',
+  },
+  {
+    key: 'mensajes',
+    label: 'Mensajes',
+    icon: 'lucide:message-circle',
+    url: '/mensajes',
+  },
+  {
+    key: 'suscripciones',
+    label: 'Suscripciones',
+    icon: 'lucide:crown',
+    url: '/suscripciones',
+  },
+  {
     key: 'recuerdos',
     label: 'Recuerdos',
     icon: 'lucide:camera',
@@ -49,6 +67,12 @@ export const menuItems: MenuItemType[] = [
     url: '/users/list',
   },
   {
+    key: 'roles',
+    label: 'Roles',
+    icon: 'lucide:shield-check',
+    url: '/admin/roles',
+  },
+  {
     key: 'categorias',
     label: 'Categorías',
     icon: 'lucide:tag',
@@ -65,6 +89,12 @@ export const menuItems: MenuItemType[] = [
     label: 'Citas',
     icon: 'lucide:heart-handshake',
     url: '/admin/citas',
+  },
+  {
+    key: 'admin-pagos',
+    label: 'Pagos',
+    icon: 'lucide:receipt',
+    url: '/admin/pagos',
   },
   {
     key: 'perfil',
