@@ -227,7 +227,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute, RouterLink } from 'vue-router'
 import { Icon } from '@iconify/vue'
-import authBg from '@/assets/images/auth-bg.jpg'
+import authBg from '@/assets/images/hr-dashboard.png'
 import { useAuthStore } from '@/stores/auth'
 
 const router    = useRouter()
